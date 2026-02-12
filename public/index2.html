@@ -1,0 +1,13 @@
+<!doctype html>
+<title>EduPing</title>
+<input id="t"><button onclick="send()">Send</button>
+<ul id="u"></ul>
+<script>
+function send(){
+  fetch('/api/msg',{method:'POST',headers:{'Content-Type':'application/json'},
+         body:JSON.stringify({text:document.getElementById('t').value})});
+}
+fetch('/api/msg').then(r=>r.json()).then(a=>{
+  document.getElementById('u').innerHTML=a.map(m=>'<li>'+m+'</li>').join('');
+});
+</script>

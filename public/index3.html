@@ -1,0 +1,665 @@
+<html lang="en"><head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduPing</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #fff;
+      color: #333;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      background-color: #d60b0b;
+      position: relative;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+      margin-bottom: 8px;
+    }
+
+    .search-container {
+      width: 90%;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.2);
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      padding: 10px 15px;
+      background-color: #f7f7f7;
+    }
+    nav button {
+      flex: 1;
+      max-width: 180px;
+      margin: 8px;
+      padding: 14px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    nav button:hover {
+      background-color: #c41f1f;
+      color: #fff;
+    }
+
+    section {
+      display: none;
+      padding: 25px;
+    }
+    section.active {
+      display: block;
+    }
+
+    .announcement-categories {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .ann-btn {
+      width: 80%;
+      padding: 15px;
+      background: linear-gradient(135deg, #b31616, #800000);
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+      transition: all 0.3s;
+    }
+    .ann-btn:hover {
+      background: linear-gradient(135deg, #800000, #b31616);
+      transform: scale(1.02);
+    }
+
+    /* Announcement card like social media post */
+    #announcementDisplay {
+      margin-top: 20px;
+      max-width: 500px;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.15);
+      padding: 15px;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    #announcementDisplay .profile-section {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    #announcementDisplay .profile-pic {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      overflow: hidden;
+      margin-right: 12px;
+      border: 2px solid #d60b0b;
+    }
+    #announcementDisplay .profile-pic img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    #announcementDisplay .profile-name {
+      font-weight: bold;
+      font-size: 18px;
+      color: #d60b0b;
+    }
+    #announcementDisplay .caption {
+      font-size: 15px;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    #announcementDisplay ul {
+      list-style-type: disc;
+      padding-left: 20px;
+      font-size: 15px;
+    }
+    #announcementDisplay ul li {
+      margin: 6px 0;
+    }
+
+    /* Redesigned Profile Section */
+    #profile {
+      max-width: 380px;
+      margin: 30px auto;
+      text-align: center;
+      padding: 25px;
+    }
+    #profile h2 {
+      margin-bottom: 25px;
+    }
+    #profile img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 3px solid #d60b0b;
+      object-fit: cover;
+      margin-bottom: 20px;
+    }
+    #profile h3 {
+      font-weight: 700;
+      font-size: 24px;
+      color: #d60b0b;
+      margin-bottom: 4px;
+    }
+    #profile .username {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    #profile .profile-form {
+      margin-top: 30px;
+      text-align: left;
+    }
+    #profile .profile-form label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    #profile .profile-form input {
+      width: 100%;
+      padding: 10px 14px;
+      margin-bottom: 20px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    #profile .profile-form button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #d60b0b, #900404);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #profile .profile-form button:hover {
+      background-color: #a00606;
+    }
+
+    /* Forum styles */
+    .forum-input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    .forum-btn {
+      margin-top: 15px;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #d60b0b, #900404);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .forum-btn:hover {
+      background-color: #a00606;
+    }
+    /* Forum posts container */
+    #forumPosts {
+      max-width: 600px;
+      margin: 0 auto;
+      margin-top: 15px;
+    }
+    /* Forum post card */
+    .forum-post {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .forum-post-header {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .forum-post-header img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 12px;
+      object-fit: cover;
+    }
+    .forum-post-header .username {
+      font-weight: 700;
+      color: #d60b0b;
+      font-size: 16px;
+    }
+    .forum-post-content {
+      margin-bottom: 12px;
+      line-height: 1.4;
+      font-size: 16px;
+      white-space: pre-wrap;
+    }
+    /* Comments section */
+    .comments-section {
+      margin-top: 10px;
+    }
+    .comment-list {
+      margin-bottom: 12px;
+    }
+    .comment-list div {
+      padding: 6px 10px;
+      background: #f0f0f0;
+      border-radius: 6px;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+    /* Comment input */
+    .comment-input-div {
+      display: flex;
+      gap: 8px;
+    }
+    .comment-input {
+      flex: 1;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    .comment-btn {
+      background: linear-gradient(135deg, #d60b0b, #900404);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .comment-btn:hover {
+      background-color: #a00606;
+    }
+
+    /* ICTC button style */
+    .ictc-help {
+      margin-top: 20px;
+      padding: 14px;
+      width: 100%;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+      font-size: 16px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #b31616, #800000);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 2px 2px 12px rgba(0,0,0,0.2);
+      transition: all 0.3s;
+    }
+    .ictc-help:hover {
+      background: linear-gradient(135deg, #800000, #b31616);
+      transform: scale(1.02);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">EduPing</div>
+    <div class="search-container" style="width:90%; margin-top:8px;">
+      <input type="text" placeholder="Search..." id="searchBar" />
+    </div>
+  </header>
+
+  <nav>
+    <button onclick="showSection('announcements')">Announcements</button>
+    <button onclick="showSection('profile')">My Profile</button>
+    <button onclick="showSection('forums')">Forums</button>
+    <button class="ictc-help" onclick="alert('ICTC notified!')">Get ICTC Help</button>
+  </nav>
+
+  <!-- Announcements -->
+  <section id="announcements" class="active">
+    <h2 style="text-align:center;">Announcements</h2>
+    <div class="announcement-categories">
+      <button class="ann-btn" onclick="showSchedule()">Class Section (e.g., 12 STEM 1)</button>
+      <button class="ann-btn" onclick="showClubAnnouncements()">Club Announcements</button>
+      <button class="ann-btn" onclick="showGrade12Announcements()">Grade 12 Students</button>
+      <button class="ann-btn" onclick="showSHSAnnouncements()">SHS Announcements</button>
+      <button class="ann-btn" onclick="showSBURNews()">SBU-R News</button>
+    </div>
+
+    <!-- Display schedule & announcements here -->
+    <div id="announcementDisplay" style="display: block;">
+      <div class="profile-section" style="display:flex; align-items:center; margin-bottom:12px;">
+        <div class="profile-pic" style="width:50px; height:50px; border-radius:50%; overflow:hidden; margin-right:12px; border: 2px solid #d60b0b;">
+          <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/San_Beda_University_Logo.svg" alt="San Beda Logo" style="width:100%; height:100%; object-fit:cover;" />
+        </div>
+        <div class="profile-name" style="font-weight:bold; font-size:18px; color:#d60b0b;">OPSA</div>
+      </div>
+      <div class="caption" style="font-size:15px; margin-bottom:10px; line-height:1.4;">
+        📅 <strong>February 12, 2026</strong> Schedule for Grade 12 Senior High School 🦁🐯✨
+      </div>
+      <ul style="list-style-type:disc; padding-left:20px; font-size:15px;">
+        <li>🕗 8:00 AM - General Physics 2</li>
+        <li>📖 9:30 AM - Philosophy</li>
+        <li>🧬 11:00 AM - General Biology 2</li>
+        <li>📝 1:00 PM - MIL</li>
+        <li>📚 2:30 PM - ALRWE</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Profile -->
+  <section id="profile" class="">
+    <h2>My Profile</h2>
+    <div>
+      <img src="https://i.pravatar.cc/150?img=12" alt="Profile Picture" />
+    </div>
+    <h3>Alex Parker</h3>
+    <div class="username">@alex.parker@sbu.edu.ph</div>
+    <form class="profile-form" onsubmit="saveProfile(event)">
+      <label for="nameInput">Name:</label>
+      <input
+        type="text"
+        placeholder="Your name"
+        id="nameInput"
+        value="Alex Parker"
+      />
+      <label for="contactInput">Contact:</label>
+      <input
+        type="text"
+        placeholder="Your contact info"
+        id="contactInput"
+        value="alex.parker@sbu.edu.ph"
+      />
+      <button type="submit">Save</button>
+    </form>
+  </section>
+
+  <!-- Forums -->
+  <section id="forums" class="">
+    <h2 style="text-align:center;">Ask Questions / Forum</h2>
+    
+    <!-- New Question Input -->
+    <div style="max-width: 600px; margin: 0 auto 20px auto; display: flex; gap: 10px;">
+      <input type="text" id="forumInput" class="forum-input" placeholder="Type your question..." style="flex: 1;" />
+      <button class="forum-btn" onclick="addForumPost()">Post Question</button>
+    </div>
+
+    <!-- Posts Container -->
+    <div id="forumPosts">
+      <!-- Sample post inserted by script -->
+    </div>
+  </section>
+
+  <script>
+    function showSection(sectionId) {
+      document.querySelectorAll("section").forEach((sec) => {
+        sec.classList.remove("active");
+        if (sec.id === sectionId) sec.classList.add("active");
+      });
+      // also clear the announcement display if leaving announcements
+      if (sectionId !== "announcements") {
+        document.getElementById("announcementDisplay").style.display = "none";
+      } else {
+        // show initial schedule on return to announcements
+        showSchedule();
+        document.getElementById("announcementDisplay").style.display = "block";
+      }
+    }
+
+    function saveProfile(e) {
+      e.preventDefault();
+      alert(
+        `Profile saved: ${document.getElementById("nameInput").value}, ${document.getElementById(
+          "contactInput"
+        ).value}`
+      );
+    }
+
+    function showSchedule() {
+      const displayDiv = document.getElementById("announcementDisplay");
+      displayDiv.innerHTML = `
+        <div class="profile-section" style="display:flex; align-items:center; margin-bottom:12px;">
+          <div class="profile-pic" style="width:50px; height:50px; border-radius:50%; overflow:hidden; margin-right:12px; border: 2px solid #d60b0b;">
+            <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/San_Beda_University_Logo.svg" alt="San Beda Logo" style="width:100%; height:100%; object-fit:cover;" />
+          </div>
+          <div class="profile-name" style="font-weight:bold; font-size:18px; color:#d60b0b;">OPSA</div>
+        </div>
+        <div class="caption" style="font-size:15px; margin-bottom:10px; line-height:1.4;">
+          📅 <strong>February 12, 2026</strong> Schedule for Grade 12 Senior High School 🦁🐯✨
+        </div>
+        <ul style="list-style-type:disc; padding-left:20px; font-size:15px;">
+          <li>🕗 8:00 AM - General Physics 2</li>
+          <li>📖 9:30 AM - Philosophy</li>
+          <li>🧬 11:00 AM - General Biology 2</li>
+          <li>📝 1:00 PM - MIL</li>
+          <li>📚 2:30 PM - ALRWE</li>
+        </ul>
+      `;
+      displayDiv.style.display = "block";
+    }
+
+    function showClubAnnouncements() {
+      const displayDiv = document.getElementById("announcementDisplay");
+      displayDiv.innerHTML = `
+        <div class="profile-section" style="display:flex; align-items:center; margin-bottom:12px;">
+          <div class="profile-pic" style="width:50px; height:50px; border-radius:50%; overflow:hidden; margin-right:12px; border: 2px solid #d60b0b;">
+            <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/San_Beda_University_Logo.svg" alt="Club Logo" style="width:100%; height:100%; object-fit:cover;" />
+          </div>
+          <div class="profile-name" style="font-weight:bold; font-size:18px; color:#d60b0b;">Student Council</div>
+        </div>
+        <div class="caption" style="font-size:15px; margin-bottom:10px; line-height:1.4;">
+          📢 <strong>Upcoming Club Events - March 2026</strong>
+        </div>
+        <ul style="list-style-type:disc; padding-left:20px; font-size:15px;">
+          <li>🎉 March 8: International Women's Day Celebration</li>
+          <li>🏅 March 20: Annual Sports Meet Registration Opens</li>
+          <li>📚 March 25: Book Club Monthly Discussion</li>
+        </ul>
+      `;
+      displayDiv.style.display = "block";
+    }
+
+    function showGrade12Announcements() {
+      const displayDiv = document.getElementById("announcementDisplay");
+      displayDiv.innerHTML = `
+        <div class="profile-section" style="display:flex; align-items:center; margin-bottom:12px;">
+          <div class="profile-pic" style="width:50px; height:50px; border-radius:50%; overflow:hidden; margin-right:12px; border: 2px solid #d60b0b;">
+            <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/San_Beda_University_Logo.svg" alt="Grade 12" style="width:100%; height:100%; object-fit:cover;" />
+          </div>
+          <div class="profile-name" style="font-weight:bold; font-size:18px; color:#d60b0b;">Grade 12 Office</div>
+        </div>
+        <div class="caption" style="font-size:15px; margin-bottom:10px; line-height:1.4;">
+          🎓 <strong>Important Dates for Grade 12 Students</strong>
+        </div>
+        <ul style="list-style-type:disc; padding-left:20px; font-size:15px;">
+          <li>🗓 March 15: Graduation Ceremony Information Submission Deadline</li>
+          <li>📑 April 10: Senior High School Final Exams</li>
+          <li>📝 April 25: College Application Workshop</li>
+        </ul>
+      `;
+      displayDiv.style.display = "block";
+    }
+
+    function showSHSAnnouncements() {
+      const displayDiv = document.getElementById("announcementDisplay");
+      displayDiv.innerHTML = `
+        <div class="profile-section" style="display:flex; align-items:center; margin-bottom:12px;">
+          <div class="profile-pic" style="width:50px; height:50px; border-radius:50%; overflow:hidden; margin-right:12px; border: 2px solid #d60b0b;">
+            <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/San_Beda_University_Logo.svg" alt="SHS Logo" style="width:100%; height:100%; object-fit:cover;" />
+          </div>
+          <div class="profile-name" style="font-weight:bold; font-size:18px; color:#d60b0b;">Senior High School Office</div>
+        </div>
+        <div class="caption" style="font-size:15px; margin-bottom:10px; line-height:1.4;">
+          🏫 <strong>SHS Announcements - April 2026</strong>
+        </div>
+        <ul style="list-style-type:disc; padding-left:20px; font-size:15px;">
+          <li>📌 April 5: New SHS Student Orientation</li>
+          <li>🔍 April 15: SHS Scholarship Applications Open</li>
+          <li>🧪 April 20: Science Fair Registration Deadline</li>
+        </ul>
+      `;
+      displayDiv.style.display = "block";
+    }
+
+    function showSBURNews() {
+      const displayDiv = document.getElementById("announcementDisplay");
+      displayDiv.innerHTML = `
+        <div class="profile-section" style="display:flex; align-items:center; margin-bottom:12px;">
+          <div class="profile-pic" style="width:50px; height:50px; border-radius:50%; overflow:hidden; margin-right:12px; border: 2px solid #d60b0b;">
+            <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/San_Beda_University_Logo.svg" alt="SBU-R Logo" style="width:100%; height:100%; object-fit:cover;" />
+          </div>
+          <div class="profile-name" style="font-weight:bold; font-size:18px; color:#d60b0b;">San Beda University - Rizal</div>
+        </div>
+        <div class="caption" style="font-size:15px; margin-bottom:10px; line-height:1.4;">
+          📰 <strong>Latest News & Updates - February 2026</strong>
+        </div>
+        <ul style="list-style-type:disc; padding-left:20px; font-size:15px;">
+          <li>🎓 New academic programs approved starting next school year</li>
+          <li>🏛 Groundbreaking ceremony for new campus building held</li>
+          <li>📢 Campus-wide energy conservation campaign launched</li>
+        </ul>
+      `;
+      displayDiv.style.display = "block";
+    }
+
+    const blockedWords = ["badword1", "foulword", "inappropriate"];
+
+    /* Forum scripts */
+    function addForumPost() {
+      const input = document.getElementById("forumInput");
+      const text = input.value.trim();
+      if (!text) return;
+
+      createPost("You", text);
+      input.value = "";
+    }
+
+    function createPost(username, text, isSample = false) {
+      const postsContainer = document.getElementById("forumPosts");
+
+      for (const bw of blockedWords) {
+        if (text.toLowerCase().includes(bw)) {
+          alert("Your post contains inappropriate language!");
+          return;
+        }
+      }
+
+      const post = document.createElement("div");
+      post.className = "forum-post";
+
+      // Header
+      const header = document.createElement("div");
+      header.className = "forum-post-header";
+
+      const avatar = document.createElement("img");
+      avatar.src = "https://i.pravatar.cc/50?u=" + (isSample ? "physics_guy" : username);
+      avatar.alt = username + " avatar";
+
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "username";
+      nameSpan.textContent = username;
+
+      header.appendChild(avatar);
+      header.appendChild(nameSpan);
+
+      // Content
+      const content = document.createElement("p");
+      content.className = "forum-post-content";
+      content.textContent = text;
+
+      // Comments section
+      const commentsSection = document.createElement("div");
+      commentsSection.className = "comments-section";
+
+      const commentList = document.createElement("div");
+      commentList.className = "comment-list";
+
+      commentsSection.appendChild(commentList);
+
+      // Comment input area
+      const commentInputDiv = document.createElement("div");
+      commentInputDiv.className = "comment-input-div";
+
+      const commentInput = document.createElement("input");
+      commentInput.type = "text";
+      commentInput.placeholder = "Write a comment...";
+      commentInput.className = "comment-input";
+
+      const commentBtn = document.createElement("button");
+      commentBtn.className = "comment-btn";
+      commentBtn.textContent = "Comment";
+      commentBtn.onclick = () => {
+        const commentText = commentInput.value.trim();
+        if (!commentText) return;
+
+        for (const bw of blockedWords) {
+          if (commentText.toLowerCase().includes(bw)) {
+            alert("Your comment contains inappropriate language!");
+            commentInput.value = "";
+            return;
+          }
+        }
+
+        const comment = document.createElement("div");
+        comment.textContent = `You: ${commentText}`;
+
+        commentList.appendChild(comment);
+        commentInput.value = "";
+      };
+
+      commentInputDiv.appendChild(commentInput);
+      commentInputDiv.appendChild(commentBtn);
+
+      commentsSection.appendChild(commentInputDiv);
+
+      post.appendChild(header);
+      post.appendChild(content);
+      post.appendChild(commentsSection);
+
+      postsContainer.prepend(post);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      showSchedule();
+      // Add sample post on load
+      createPost(
+        "PhysicsGuy123",
+        "Hey, can someone help me understand how to solve this physics problem? It’s about projectile motion and I’m stuck!",
+        true
+      );
+    });
+  </script>
+</body></html>
