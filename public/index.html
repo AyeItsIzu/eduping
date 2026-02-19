@@ -1,749 +1,920 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
+  <script type="module" src="/@vite/client"></script>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>EduPing with Login</title>
+  <title>EduPing</title>
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
   <style>
-    /* Reset and base styles */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body, html {
-      height: 100%;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #fff;
-      color: #333;
-    }
-
-    /* LOGIN SCREEN */
-    #loginScreen {
-      position: fixed;
-      top: 0; left: 0; right:0; bottom:0;
-      background: #d60b0b;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-    #loginForm {
-      background: white;
-      padding: 30px 35px;
-      border-radius: 12px;
-      box-shadow: 0 3px 15px rgba(0,0,0,0.3);
-      width: 320px;
-      text-align: center;
-    }
-    #loginForm h2 {
-      margin-bottom: 20px;
-      color: #d60b0b;
-    }
-    #loginForm input[type="email"],
-    #loginForm input[type="password"] {
-      width: 100%;
-      padding: 10px 14px;
-      margin-bottom: 20px;
-      font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    #loginForm button {
-      width: 100%;
-      padding: 12px;
-      background: linear-gradient(135deg, #d60b0b, #900404);
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    #loginForm button:hover {
-      background-color: #a00606;
-    }
-    #loginError {
-      color: #fff;
-      margin-bottom: 12px;
-      display: none;
+    :root{
+      --red-900:#4a0000;
+      --red-800:#700000;
+      --red-700:#900404;
+      --red-600:#b31616;
+      --red-500:#d60b0b;
+      --card:#ffffff;
+      --ink:#1a1a1a;
+      --muted:#666;
+      --shadow: 0 10px 25px rgba(0,0,0,.25);
+      --radius: 16px;
+      --maxw: 760px;
     }
 
-    /* HIDE MAIN AFTER LOGIN */
-    #mainApp {
-      display: none;
-      min-height: 100vh;
-      background: #fff;
-      color: #333;
+    *{ box-sizing:border-box; margin:0; padding:0; }
+    html,body{ height:100%; font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; }
+
+    body{
+      color:#fff;
+      background:
+        radial-gradient(1000px 500px at 50% -150px, rgba(255,255,255,.25), transparent 60%),
+        radial-gradient(700px 450px at 75% 20%, rgba(255,255,255,.12), transparent 55%),
+        linear-gradient(180deg, var(--red-900), var(--red-500) 40%, var(--red-900));
+      overflow-x:hidden;
     }
 
-    /* Keep your existing styles here for header, nav, sections... */
-    header {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 15px;
-      background-color: #d60b0b;
-      position: relative;
+    /* Shared */
+    .container{ width: calc(100% - 24px); max-width: var(--maxw); margin: 0 auto; }
+    .hidden{ display:none !important; }
+
+    /* ===== LOGIN ===== */
+    #loginScreen{
+      position:fixed; inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 24px 12px;
+      z-index:9999;
     }
 
-    .logo {
-      font-size: 28px;
-      font-weight: bold;
-      color: #fff;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-      margin-bottom: 8px;
+    .loginWrap{
+      width: min(420px, 100%);
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap: 14px;
     }
 
-    .search-container {
-      width: 90%;
+    .logoMark{
+      font-weight:900;
+      font-size: 56px;
+      letter-spacing: -1px;
+      color:#fff;
+      text-shadow: 0 10px 25px rgba(0,0,0,.45);
+      transform: rotate(-6deg);
+      user-select:none;
     }
-    input[type="text"] {
-      width: 100%;
-      padding: 10px 14px;
-      border-radius: 6px;
-      border: none;
-      font-size: 16px;
-      box-shadow: 0 0 6px rgba(0,0,0,0.2);
+    .logoMark .bang{
+      color:#fff;
+      display:inline-block;
+      margin-left: 2px;
+      text-shadow: 0 10px 25px rgba(0,0,0,.45);
     }
-
-    nav {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-around;
-      padding: 10px 15px;
-      background-color: #f7f7f7;
-    }
-    nav button {
-      flex: 1;
-      max-width: 180px;
-      margin: 8px;
-      padding: 14px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    nav button:hover {
-      background-color: #c41f1f;
-      color: #fff;
-    }
-
-    section {
-      display: none;
-      padding: 25px;
-    }
-    section.active {
+    .logoImg{
+      width: 110px;       /* adjust as needed */
+      height: auto;
       display: block;
+      filter: drop-shadow(0 10px 25px rgba(0,0,0,.45));
+      user-select: none;
     }
 
-    .announcement-categories {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 15px;
-      margin-top: 20px;
-    }
-    .ann-btn {
-      width: 80%;
-      padding: 15px;
-      background: linear-gradient(135deg, #b31616, #800000);
-      color: #fff;
-      font-weight: bold;
-      border: none;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
-      transition: all 0.3s;
-    }
-    .ann-btn:hover {
-      background: linear-gradient(135deg, #800000, #b31616);
-      transform: scale(1.02);
-    }
-
-    /* Announcement card */
-    #announcementDisplay {
-      margin-top: 20px;
-      max-width: 500px;
-      background-color: #fff;
-      border-radius: 12px;
-      box-shadow: 0 2px 15px rgba(0,0,0,0.15);
-      padding: 15px;
-      display: block;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    #announcementDisplay .profile-section {
-      display: flex;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    #announcementDisplay .profile-pic {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      overflow: hidden;
-      margin-right: 12px;
-      border: 2px solid #d60b0b;
-    }
-    #announcementDisplay .profile-pic img {
+    #loginForm{
       width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    #announcementDisplay .profile-name {
-      font-weight: bold;
-      font-size: 18px;
-      color: #d60b0b;
-    }
-    #announcementDisplay .caption {
-      font-size: 15px;
-      margin-bottom: 10px;
-      line-height: 1.4;
-    }
-    #announcementDisplay ul {
-      list-style-type: disc;
-      padding-left: 20px;
-      font-size: 15px;
-    }
-    #announcementDisplay ul li {
-      margin: 6px 0;
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 22px 18px 18px;
+      backdrop-filter: blur(8px);
     }
 
-    /* Redesigned Profile Section */
-    #profile {
-      max-width: 380px;
-      margin: 30px auto;
-      text-align: center;
-      padding: 25px;
+    #loginForm h2{
+      text-align:center;
+      color:#fff;
+      font-size: 22px;
+      margin-bottom: 16px;
+      letter-spacing: .2px;
     }
-    #profile h2 {
-      margin-bottom: 25px;
-    }
-    #profile img {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      border: 3px solid #d60b0b;
-      object-fit: cover;
-      margin-bottom: 20px;
-    }
-    #profile h3 {
-      font-weight: 700;
-      font-size: 24px;
-      color: #d60b0b;
-      margin-bottom: 4px;
-    }
-    #profile .username {
-      color: #666;
+
+    #loginError{
+      display:none;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.2);
+      color:#fff;
+      padding: 10px 12px;
+      border-radius: 12px;
+      margin-bottom: 12px;
       font-size: 14px;
-      margin-bottom: 15px;
-    }
-    #profile .profile-form {
-      margin-top: 30px;
-      text-align: left;
-    }
-    #profile .profile-form label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 6px;
-    }
-    #profile .profile-form input {
-      width: 100%;
-      padding: 10px 14px;
-      margin-bottom: 20px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-    #profile .profile-form button {
-      width: 100%;
-      padding: 12px;
-      background: linear-gradient(135deg, #d60b0b, #900404);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    #profile .profile-form button:hover {
-      background-color: #a00606;
     }
 
-    /* Forum styles */
-    .forum-input {
+    .field{
       width: 100%;
-      padding: 10px 14px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      background: rgba(255,255,255,.92);
+      border-radius: 12px;
+      border: 0;
+      outline: none;
+      padding: 14px 14px;
       font-size: 16px;
+      margin-bottom: 12px;
+      color:#111;
     }
-    .forum-btn {
-      margin-top: 15px;
-      padding: 12px 20px;
-      background: linear-gradient(135deg, #d60b0b, #900404);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: 0.3s;
+
+    .btnRow{
+      display:flex;
+      gap: 10px;
+      margin-top: 6px;
     }
-    .forum-btn:hover {
-      background-color: #a00606;
+
+    .btn{
+      flex:1;
+      border:0;
+      cursor:pointer;
+      border-radius: 999px;
+      padding: 11px 12px;
+      font-weight: 700;
+      color:#fff;
+      background: linear-gradient(135deg, var(--red-500), var(--red-700));
+      box-shadow: 0 10px 20px rgba(0,0,0,.25);
+      transition: transform .12s ease, filter .12s ease;
     }
-    /* Forum posts container */
-    #forumPosts {
-      max-width: 600px;
-      margin: 0 auto;
-      margin-top: 15px;
+    .btn:active{ transform: translateY(1px); filter: brightness(.98); }
+    .btn.secondary{
+      background: rgba(255,255,255,.16);
+      border: 1px solid rgba(255,255,255,.22);
+      box-shadow: none;
     }
-    /* Forum post card */
-    .forum-post {
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      padding: 15px;
-      margin-bottom: 20px;
+
+    /* ===== MAIN APP ===== */
+    #mainApp{
+      display:none;
+      min-height: 100vh;
+      padding-bottom: 24px;
     }
-    .forum-post-header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
+
+    header{
+      position: sticky;
+      top:0;
+      z-index: 50;
+      padding: 14px 0 10px;
+      background: linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,0));
+      backdrop-filter: blur(6px);
     }
-    .forum-post-header img {
+
+    .headerRow{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+    }
+
+    .appTitle{
+      text-align:center;
+      font-weight: 800;
+      letter-spacing:.4px;
+      font-size: 20px;
+      flex:1;
+      user-select:none;
+    }
+
+    .iconBtn{
       width: 40px;
       height: 40px;
-      border-radius: 50%;
-      margin-right: 12px;
-      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: rgba(0,0,0,.20);
+      color:#fff;
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      transition: transform .12s ease, background .12s ease;
     }
-    .forum-post-header .username {
-      font-weight: 700;
-      color: #d60b0b;
-      font-size: 16px;
-    }
-    .forum-post-content {
-      margin-bottom: 12px;
-      line-height: 1.4;
-      font-size: 16px;
-      white-space: pre-wrap;
-    }
-    /* Comments section */
-    .comments-section {
+    .iconBtn:hover{ background: rgba(0,0,0,.28); }
+    .iconBtn:active{ transform: translateY(1px); }
+
+    .searchBar{
       margin-top: 10px;
-    }
-    .comment-list {
-      margin-bottom: 12px;
-    }
-    .comment-list div {
-      padding: 6px 10px;
-      background: #f0f0f0;
-      border-radius: 6px;
-      margin-bottom: 6px;
-      font-size: 14px;
-    }
-    /* Comment input */
-    .comment-input-div {
-      display: flex;
-      gap: 8px;
-    }
-    .comment-input {
-      flex: 1;
-      padding: 8px 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 14px;
-    }
-    .comment-btn {
-      background: linear-gradient(135deg, #d60b0b, #900404);
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 8px 12px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-    }
-    .comment-btn:hover {
-      background-color: #a00606;
+      width: 100%;
+      background: rgba(255,255,255,.95);
+      border-radius: 12px;
+      border: 0;
+      outline:none;
+      padding: 12px 14px;
+      font-size: 15px;
+      color:#111;
     }
 
-    /* ICTC button style */
-    .ictc-help {
-      margin-top: 20px;
-      padding: 14px;
-      width: 100%;
-      max-width: 300px;
-      margin-left: auto;
-      margin-right: auto;
-      font-size: 16px;
-      font-weight: bold;
-      background: linear-gradient(135deg, #b31616, #800000);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      box-shadow: 2px 2px 12px rgba(0,0,0,0.2);
-      transition: all 0.3s;
+    /* Top icon nav */
+    .topNav{
+      margin-top: 10px;
+      display:flex;
+      gap: 10px;
+      padding: 10px;
+      border-radius: 16px;
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.16);
+      backdrop-filter: blur(8px);
+      overflow:auto;
     }
-    .ictc-help:hover {
-      background: linear-gradient(135deg, #800000, #b31616);
-      transform: scale(1.02);
+    .topNav button{
+      min-width: 54px;
+      height: 46px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.15);
+      background: rgba(255,255,255,.08);
+      color:#fff;
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      font-size: 18px;
+      transition: transform .12s ease, background .12s ease;
+      flex: 0 0 auto;
+    }
+    .topNav button:hover{ background: rgba(255,255,255,.14); }
+    .topNav button:active{ transform: translateY(1px); }
+    .topNav button.active{
+      background: rgba(255,255,255,.22);
+      border-color: rgba(255,255,255,.25);
+    }
+
+    /* Sections */
+    main{ padding-top: 10px; }
+    section{
+      display:none;
+      margin-top: 12px;
+    }
+    section.active{ display:block; }
+
+    .panel{
+      background: rgba(255,255,255,.95);
+      color: var(--ink);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    /* ===== Announcements feed ===== */
+    .feed{
+      display:flex;
+      flex-direction:column;
+      gap: 12px;
+    }
+
+    .feedCard{
+      border-radius: 18px;
+      overflow:hidden;
+      background: #fff;
+      box-shadow: 0 10px 20px rgba(0,0,0,.16);
+      border: 1px solid rgba(0,0,0,.06);
+    }
+
+    .feedTop{
+      display:flex;
+      gap: 12px;
+      align-items:center;
+      padding: 12px 12px 10px;
+      background: linear-gradient(180deg, rgba(214,11,11,.10), transparent);
+    }
+
+    .avatarRing{
+      width: 44px; height:44px;
+      border-radius: 999px;
+      padding: 2px;
+      background: linear-gradient(135deg, var(--red-500), #ff6a6a);
+      flex: 0 0 auto;
+    }
+    .avatarRing img{
+      width:100%; height:100%;
+      border-radius: 999px;
+      object-fit: cover;
+      display:block;
+      background:#fff;
+    }
+
+    .feedMeta .who{
+      font-weight: 800;
+      color: var(--red-500);
+      line-height: 1.1;
+    }
+    .feedMeta .when{
+      font-size: 12px;
+      color: #777;
+      margin-top: 2px;
+    }
+
+    .feedBody{
+      padding: 0 12px 12px;
+      color:#222;
+      line-height:1.35;
+      font-size: 14.5px;
+    }
+
+    .feedMedia{
+      margin-top: 10px;
+      border-radius: 14px;
+      overflow:hidden;
+      border: 1px solid rgba(0,0,0,.08);
+      background:#f3f3f3;
+    }
+    .feedMedia img{
+      width:100%;
+      display:block;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .feedActions{
+      display:flex;
+      gap: 10px;
+      padding: 12px;
+      border-top: 1px solid rgba(0,0,0,.06);
+    }
+
+    .pill{
+      border:0;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-weight: 800;
+      cursor:pointer;
+      background: linear-gradient(135deg, var(--red-500), var(--red-700));
+      color:#fff;
+      flex: 0 0 auto;
+    }
+
+    .pill.ghost{
+      background: rgba(214,11,11,.10);
+      color: var(--red-500);
+      border: 1px solid rgba(214,11,11,.25);
+      font-weight: 800;
+    }
+
+    /* ===== Calendar ===== */
+    .calendarTitle{
+      color:#fff;
+      font-size: 44px;
+      font-weight: 300;
+      letter-spacing: .6px;
+      margin: 6px 0 10px;
+    }
+    .calGrid{
+      display:grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background: rgba(255,255,255,.25);
+      border-radius: 16px;
+      overflow:hidden;
+      box-shadow: var(--shadow);
+    }
+    .calCell{
+      background: rgba(0,0,0,.65);
+      color:#fff;
+      min-height: 44px;
+      padding: 10px;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .calHead{
+      background: rgba(0,0,0,.82);
+      font-weight: 800;
+      text-align:center;
+    }
+    .calDay{
+      background: rgba(0,0,0,.45);
+      font-weight: 700;
+    }
+    .calBlank{ background: rgba(0,0,0,.22); }
+
+    /* ===== Profile ===== */
+    .profileWrap{
+      text-align:center;
+      padding: 16px 10px 6px;
+    }
+    .profileAvatar{
+      width: 110px; height:110px;
+      border-radius: 999px;
+      margin: 6px auto 10px;
+      border: 4px solid var(--red-500);
+      overflow:hidden;
+      box-shadow: 0 10px 20px rgba(0,0,0,.25);
+      background:#fff;
+    }
+    .profileAvatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .profileName{
+      font-weight: 900;
+      font-size: 22px;
+      color: var(--red-500);
+    }
+    .profileHandle{
+      color:#777;
+      font-size: 13px;
+      margin-top: 2px;
+    }
+    .form{
+      margin-top: 14px;
+      text-align:left;
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    .form label{ font-weight: 800; font-size: 13px; color:#333; }
+    .form input{
+      width:100%;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,.14);
+      outline:none;
+      font-size: 15px;
+    }
+    .saveBtn{
+      margin-top: 10px;
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border:0;
+      cursor:pointer;
+      font-weight: 900;
+      color:#fff;
+      background: linear-gradient(135deg, var(--red-500), var(--red-700));
+    }
+
+    /* ===== Forums ===== */
+    .forumComposer{
+      display:flex;
+      gap: 10px;
+      align-items:center;
+    }
+    .forumComposer input{
+      flex:1;
+      padding: 12px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,.14);
+      outline:none;
+      font-size: 15px;
+    }
+    .forumComposer button{
+      border:0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor:pointer;
+      font-weight: 900;
+      color:#fff;
+      background: linear-gradient(135deg, var(--red-500), var(--red-700));
+    }
+
+    #forumPosts{ margin-top: 12px; display:flex; flex-direction:column; gap: 12px; }
+
+    .forum-post{
+      background: #fff;
+      color: #111;
+      border-radius: 16px;
+      box-shadow: 0 10px 20px rgba(0,0,0,.12);
+      border: 1px solid rgba(0,0,0,.06);
+      padding: 12px;
+    }
+    .forum-post-header{ display:flex; align-items:center; gap: 10px; margin-bottom: 10px; }
+    .forum-post-header img{
+      width: 40px; height:40px;
+      border-radius: 999px;
+      object-fit:cover;
+      border: 2px solid rgba(214,11,11,.6);
+    }
+    .forum-post-header .username{ font-weight: 900; color: var(--red-500); }
+    .forum-post-content{ white-space: pre-wrap; line-height:1.35; color:#222; }
+
+    .comments-section{ margin-top: 10px; }
+    .comment-list div{
+      background: #f2f2f2;
+      border-radius: 12px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      font-size: 13.5px;
+      color:#222;
+    }
+    .comment-input-div{ display:flex; gap: 8px; }
+    .comment-input-div input{
+      flex:1;
+      padding: 10px 10px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,.14);
+      outline:none;
+    }
+    .comment-input-div button{
+      border:0;
+      border-radius: 12px;
+      padding: 10px 12px;
+      cursor:pointer;
+      font-weight: 900;
+      color:#fff;
+      background: linear-gradient(135deg, var(--red-500), var(--red-700));
     }
   </style>
 </head>
+
 <body>
-  <!-- LOGIN SCREEN -->
+  <!-- LOGIN -->
   <div id="loginScreen">
-    <form id="loginForm" onsubmit="handleLogin(event)">
-      <h2>EduPing Login</h2>
-      <div id="loginError"></div>
-      <input type="email" id="loginEmail" placeholder="Email (e.g. yourname@sbu.edu.ph)" required />
-      <input type="password" id="loginPassword" placeholder="Password" required />
-      <button type="submit">Login</button>
-    </form>
+    <div class="loginWrap">
+      <!-- <div class="logoMark">E<span class="bang">!</span></div> -->
+	<img
+  class="logoImg"
+  src="https://cdn.discordapp.com/attachments/1460556338194284599/1474132938177249340/Untitled8_20260220035739.png?ex=6998bcc8&is=69976b48&hm=08965a325763c69d6cc0e91af3c25f19fa77eabe2dda6c5da43f5ba237a1ca3c&"
+  alt="EduPing Logo"
+/>
+	
+
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <h2>EduPing</h2>
+        <div id="loginError"></div>
+
+        <input class="field" type="email" id="loginEmail" placeholder="Email" autocomplete="username" required />
+        <input class="field" type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" required />
+
+        <div class="btnRow">
+          <button class="btn" type="submit">Login</button>
+          <button class="btn secondary" type="button" onclick="handleSignup()">Sign Up</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- MAIN APP -->
   <div id="mainApp">
     <header>
-      <div class="logo">EduPing</div>
-      <div class="search-container" style="width:90%; margin-top:8px;">
-        <input type="text" placeholder="Search..." id="searchBar" />
+      <div class="container">
+        <div class="headerRow">
+          <button class="iconBtn" title="Help">
+            <i class="fa-solid fa-headset"></i>
+          </button>
+
+          <div class="appTitle">EduPing</div>
+
+          <button class="iconBtn" title="Search" onclick="focusSearch()">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </div>
+
+        <input id="searchBar" class="searchBar" type="text" placeholder="Search..." oninput="handleSearch(this.value)" />
+
+        <nav class="topNav" aria-label="Main navigation">
+          <button id="navAnnouncements" class="active" onclick="showSection('announcements')" title="Announcements">
+            <i class="fa-solid fa-bullhorn"></i>
+          </button>
+          <button id="navCalendar" onclick="showSection('calendar')" title="Calendar">
+            <i class="fa-solid fa-calendar-days"></i>
+          </button>
+          <button id="navForums" onclick="showSection('forums')" title="Forums">
+            <i class="fa-solid fa-comments"></i>
+          </button>
+          <button id="navProfile" onclick="showSection('profile')" title="Profile">
+            <i class="fa-solid fa-user"></i>
+          </button>
+          <button onclick="logout()" title="Logout">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </nav>
       </div>
     </header>
 
-    <nav>
-      <button onclick="showSection('announcements')">Announcements</button>
-      <button onclick="showSection('profile')">My Profile</button>
-      <button onclick="showSection('forums')">Forums</button>
-      <button class="ictc-help" onclick="logout()">Logout</button>
-      <button class="ictc-help" onclick="alert('ICTC notified!')">Get ICTC Help</button>
-    </nav>
+    <main class="container">
+      <!-- ANNOUNCEMENTS -->
+      <section id="announcements" class="active">
+        <div class="feed" id="announcementFeed"></div>
+      </section>
 
-    <!-- Announcements -->
-    <section id="announcements" class="active">
-      <h2 style="text-align:center;">Announcements</h2>
-      <div class="announcement-categories">
-        <button class="ann-btn" onclick="showSchedule()">Class Section (e.g., 12 STEM 1)</button>
-        <button class="ann-btn" onclick="showClubAnnouncements()">Club Announcements</button>
-        <button class="ann-btn" onclick="showGrade12Announcements()">Grade 12 Students</button>
-        <button class="ann-btn" onclick="showSHSAnnouncements()">SHS Announcements</button>
-        <button class="ann-btn" onclick="showSBURNews()">SBU-R News</button>
-      </div>
+      <!-- CALENDAR -->
+      <section id="calendar">
+        <div class="calendarTitle">February 2026</div>
+        <div id="calendarGrid" class="calGrid"></div>
+      </section>
 
-      <div id="announcementDisplay" style="display: block;">
-        <div class="profile-section" style="display:flex; align-items:center; margin-bottom:12px;">
-          <div class="profile-pic" style="width:50px; height:50px; border-radius:50%; overflow:hidden; margin-right:12px; border: 2px solid #d60b0b;">
-            <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/San_Beda_University_Logo.svg" alt="San Beda Logo" style="width:100%; height:100%; object-fit:cover;" />
+      <!-- FORUMS -->
+      <section id="forums">
+        <div class="panel">
+          <h2 style="text-align:center; margin-bottom: 12px;">Ask Questions / Forum</h2>
+
+          <div class="forumComposer">
+            <input type="text" id="forumInput" placeholder="Type your question..." />
+            <button onclick="addForumPost()">Post</button>
           </div>
-          <div class="profile-name" style="font-weight:bold; font-size:18px; color:#d60b0b;">OPSA</div>
+
+          <div id="forumPosts"></div>
         </div>
-        <div class="caption" style="font-size:15px; margin-bottom:10px; line-height:1.4;">
-          📅 <strong>February 12, 2026</strong> Schedule for Grade 12 Senior High School 🦁🐯✨
+      </section>
+
+      <!-- PROFILE -->
+      <section id="profile">
+        <div class="panel">
+          <div class="profileWrap">
+            <div class="profileAvatar">
+              <img id="profilePic" src="https://i.pravatar.cc/150?img=12" alt="Profile Picture" />
+            </div>
+            <div id="profileName" class="profileName">Alex Parker</div>
+            <div id="profileUsername" class="profileHandle">@alex.parker@sbu.edu.ph</div>
+
+            <form class="form" onsubmit="saveProfile(event)">
+              <label for="nameInput">Name:</label>
+              <input type="text" id="nameInput" value="Alex Parker" />
+
+              <label for="contactInput">Contact:</label>
+              <input type="text" id="contactInput" value="alex.parker@sbu.edu.ph" />
+
+              <button class="saveBtn" type="submit">Save</button>
+            </form>
+          </div>
         </div>
-        <ul style="list-style-type:disc; padding-left:20px; font-size:15px;">
-          <li>🕗 8:00 AM - General Physics 2</li>
-          <li>📖 9:30 AM - Philosophy</li>
-          <li>🧬 11:00 AM - General Biology 2</li>
-          <li>📝 1:00 PM - MIL</li>
-          <li>📚 2:30 PM - ALRWE</li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- Profile -->
-    <section id="profile" class="">
-      <h2>My Profile</h2>
-      <div>
-        <img src="https://i.pravatar.cc/150?img=12" alt="Profile Picture" />
-      </div>
-      <h3 id="profileName">Alex Parker</h3>
-      <div class="username" id="profileUsername">@alex.parker@sbu.edu.ph</div>
-      <form class="profile-form" onsubmit="saveProfile(event)">
-        <label for="nameInput">Name:</label>
-        <input
-          type="text"
-          placeholder="Your name"
-          id="nameInput"
-          value="Alex Parker"
-        />
-        <label for="contactInput">Contact:</label>
-        <input
-          type="text"
-          placeholder="Your contact info"
-          id="contactInput"
-          value="alex.parker@sbu.edu.ph"
-        />
-        <button type="submit">Save</button>
-      </form>
-    </section>
-
-    <!-- Forums -->
-    <section id="forums" class="">
-      <h2 style="text-align:center;">Ask Questions / Forum</h2>
-
-      <!-- New Question Input -->
-      <div style="max-width: 600px; margin: 0 auto 20px auto; display: flex; gap: 10px;">
-        <input type="text" id="forumInput" class="forum-input" placeholder="Type your question..." style="flex: 1;" />
-        <button class="forum-btn" onclick="addForumPost()">Post Question</button>
-      </div>
-
-      <!-- Posts Container -->
-      <div id="forumPosts"></div>
-    </section>
+      </section>
+    </main>
   </div>
 
   <script>
     let currentUserEmail = null;
 
+    const blockedWords = ["badword1", "foulword", "inappropriate"];
+
+    const sampleAnnouncements = [
+      {
+        org: "OPSA",
+        when: "Advisory",
+        text:
+          "The Office of the President has announced that all office work and classes will be suspended on February 25, 2026 due to the 40th anniversary of EDSA People Power Revolution.\n\nFor your information and guidance.",
+        img: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=60",
+        joinable: false,
+      },
+      {
+        org: "Almoneda Beda Parents and Alumni",
+        when: "Zoom Event",
+        text:
+          "Raising Healthy Children and Safe Kids: Learn practical strategies with our featured speaker.\n\nJoin us for an interactive session.",
+        img: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=60",
+        joinable: true,
+      },
+      {
+        org: "San Beda University - Rizal",
+        when: "News",
+        text:
+          "Campus updates: new academic programs approved starting next school year, and a campus-wide energy conservation campaign launched.",
+        img: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=60",
+        joinable: false,
+      }
+    ];
+
+    function setError(msg){
+      const errorDiv = document.getElementById("loginError");
+      if (!msg){
+        errorDiv.style.display = "none";
+        errorDiv.textContent = "";
+        return;
+      }
+      errorDiv.style.display = "block";
+      errorDiv.textContent = msg;
+    }
+
+    function handleSignup(){
+      alert("Sign Up is a UI placeholder (no backend yet). If you want, I can add localStorage signup.");
+    }
+
     function handleLogin(e) {
       e.preventDefault();
-      const emailInput = document.getElementById("loginEmail");
-      const passwordInput = document.getElementById("loginPassword");
-      const errorDiv = document.getElementById("loginError");
 
-      const email = emailInput.value.trim();
-      const password = passwordInput.value.trim();
+      const email = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
 
-      if (!email || !password) {
-        errorDiv.style.display = "block";
-        errorDiv.textContent = "Please enter both email and password.";
+      if (!email || !password){
+        setError("Please enter both email and password.");
         return;
       }
 
-      // Basic email format check
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        errorDiv.style.display = "block";
-        errorDiv.textContent = "Please enter a valid email address.";
+      if (!emailRegex.test(email)){
+        setError("Please enter a valid email address.");
         return;
       }
 
-      // Clear error
-      errorDiv.style.display = "none";
+      setError(null);
 
-      // Set current user email
       currentUserEmail = email;
 
-      // Hide login screen, show main app
-      document.getElementById("loginScreen").style.display = "none";
+      document.getElementById("loginScreen").classList.add("hidden");
       document.getElementById("mainApp").style.display = "block";
 
-      // Initialize UI with user data
       initializeUserUI();
-
-      // Show announcements section initially
       showSection("announcements");
     }
 
-    function initializeUserUI() {
-      // Profile fields prefill
-      document.getElementById("profileUsername").textContent = "@" + currentUserEmail;
-      document.getElementById("contactInput").value = currentUserEmail;
-
-      // Provide default name from email username before @, capitalized, e.g. "Alex.Parker"
-      let defaultName = currentUserEmail.split("@")[0].replace(/\./g, ' ');
-      defaultName = defaultName.split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
-
-      if (!document.getElementById("nameInput").value || document.getElementById("nameInput").value === "Alex Parker") {
-        document.getElementById("nameInput").value = defaultName;
-        document.getElementById("profileName").textContent = defaultName;
-      } else {
-        document.getElementById("profileName").textContent = document.getElementById("nameInput").value;
-      }
-
-      // Clear forum posts and add sample post for new user
-      document.getElementById("forumPosts").innerHTML = "";
-      createPost(
-        "PhysicsGuy123",
-        "Hey, can someone help me understand how to solve this physics problem? It’s about projectile motion and I’m stuck!",
-        true
-      );
-    }
-
-    function logout() {
-      // Reset user info and show login screen
+    function logout(){
       currentUserEmail = null;
+
       document.getElementById("mainApp").style.display = "none";
-      document.getElementById("loginScreen").style.display = "flex";
-      // Clear login inputs
+      document.getElementById("loginScreen").classList.remove("hidden");
+
       document.getElementById("loginEmail").value = "";
       document.getElementById("loginPassword").value = "";
-      document.getElementById("loginError").style.display = "none";
-      // Reset profile and forum content
+      setError(null);
+
+      // Reset profile
       document.getElementById("profileName").textContent = "Alex Parker";
       document.getElementById("profileUsername").textContent = "@alex.parker@sbu.edu.ph";
       document.getElementById("nameInput").value = "Alex Parker";
       document.getElementById("contactInput").value = "alex.parker@sbu.edu.ph";
+
+      // Reset forum
       document.getElementById("forumPosts").innerHTML = "";
+      document.getElementById("forumInput").value = "";
+
+      // Reset announcements feed
+      document.getElementById("announcementFeed").innerHTML = "";
+      document.getElementById("searchBar").value = "";
     }
 
-    function showSection(sectionId) {
-      document.querySelectorAll("section").forEach(sec => {
-        sec.classList.remove("active");
-        if (sec.id === sectionId) sec.classList.add("active");
-      });
-      // Also clear announcement display if not in announcements
-      if (sectionId !== "announcements") {
-        document.getElementById("announcementDisplay").style.display = "none";
-      } else {
-        showSchedule();
-        document.getElementById("announcementDisplay").style.display = "block";
+    function initializeUserUI(){
+      // Profile
+      document.getElementById("profileUsername").textContent = "@" + currentUserEmail;
+      document.getElementById("contactInput").value = currentUserEmail;
+
+      let defaultName = currentUserEmail.split("@")[0].replace(/\./g, " ");
+      defaultName = defaultName.split(" ").map(s => s ? (s[0].toUpperCase() + s.slice(1)) : s).join(" ").trim();
+
+      const nameInput = document.getElementById("nameInput");
+      if (!nameInput.value || nameInput.value === "Alex Parker"){
+        nameInput.value = defaultName || "Student";
       }
+      document.getElementById("profileName").textContent = nameInput.value;
+
+      // Forum
+      document.getElementById("forumPosts").innerHTML = "";
+      createPost("PhysicsGuy123",
+        "Hey, can someone help me understand how to solve this physics problem? It’s about projectile motion and I’m stuck!",
+        true
+      );
+
+      // Announcements feed
+      renderAnnouncements(sampleAnnouncements);
+
+      // Calendar Feb 2026
+      renderCalendar(2026, 1);
     }
 
-    function saveProfile(e) {
+    function focusSearch(){
+      document.getElementById("searchBar").focus();
+    }
+
+    function showSection(sectionId){
+      document.querySelectorAll("section").forEach(sec => sec.classList.toggle("active", sec.id === sectionId));
+
+      // nav active highlight
+      const map = {
+        announcements: "navAnnouncements",
+        calendar: "navCalendar",
+        forums: "navForums",
+        profile: "navProfile",
+      };
+      Object.values(map).forEach(id => document.getElementById(id)?.classList.remove("active"));
+      if (map[sectionId]) document.getElementById(map[sectionId]).classList.add("active");
+    }
+
+    function saveProfile(e){
       e.preventDefault();
       const newName = document.getElementById("nameInput").value.trim();
-      if (newName) {
-        document.getElementById("profileName").textContent = newName;
-        alert(`Profile saved: ${newName}, ${document.getElementById("contactInput").value}`);
-      } else {
-        alert("Name cannot be empty");
+      if (!newName) { alert("Name cannot be empty"); return; }
+      document.getElementById("profileName").textContent = newName;
+      alert(`Profile saved: ${newName}`);
+    }
+
+    /* ===== Announcements feed ===== */
+    function renderAnnouncements(items){
+      const feed = document.getElementById("announcementFeed");
+      feed.innerHTML = "";
+
+      items.forEach((a, idx) => {
+        const card = document.createElement("div");
+        card.className = "feedCard";
+
+        card.innerHTML = `
+          <div class="feedTop">
+            <div class="avatarRing">
+              <img alt="${escapeHtml(a.org)} logo" src="https://upload.wikimedia.org/wikipedia/en/a/a4/San_Beda_University_Logo.svg">
+            </div>
+            <div class="feedMeta">
+              <div class="who">${escapeHtml(a.org)}</div>
+              <div class="when">${escapeHtml(a.when)}</div>
+            </div>
+          </div>
+
+          <div class="feedBody">
+            <div>${escapeHtml(a.text).replaceAll("\\n","<br>")}</div>
+            <div class="feedMedia">
+              <img alt="announcement image ${idx+1}" src="${a.img}">
+            </div>
+          </div>
+
+          <div class="feedActions">
+            ${a.joinable ? `<button class="pill" onclick="joinEvent(${idx})">I'm Joining!</button>` : ""}
+            <button class="pill ghost" onclick="alert('Saved (demo).')">Save</button>
+          </div>
+        `;
+
+        feed.appendChild(card);
+      });
+    }
+
+    function joinEvent(idx){
+      alert("You joined (demo). If you want, I can persist this via localStorage.");
+    }
+
+    function handleSearch(q){
+      q = (q || "").trim().toLowerCase();
+      if (!q){
+        renderAnnouncements(sampleAnnouncements);
+        return;
+      }
+      const filtered = sampleAnnouncements.filter(a =>
+        a.org.toLowerCase().includes(q) ||
+        a.when.toLowerCase().includes(q) ||
+        a.text.toLowerCase().includes(q)
+      );
+      renderAnnouncements(filtered);
+    }
+
+    function escapeHtml(str){
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    /* ===== Calendar ===== */
+    function renderCalendar(year, monthIndex){
+      const grid = document.getElementById("calendarGrid");
+      const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+      const first = new Date(year, monthIndex, 1);
+      const last = new Date(year, monthIndex + 1, 0);
+
+      const startDay = first.getDay(); // 0 Sunday
+      const totalDays = last.getDate();
+
+      grid.innerHTML = "";
+
+      // headers
+      for (const d of days){
+        const cell = document.createElement("div");
+        cell.className = "calCell calHead";
+        cell.textContent = d;
+        grid.appendChild(cell);
+      }
+
+      // blanks before day 1
+      for (let i=0; i<startDay; i++){
+        const cell = document.createElement("div");
+        cell.className = "calCell calBlank";
+        cell.textContent = "";
+        grid.appendChild(cell);
+      }
+
+      // days
+      for (let day=1; day<=totalDays; day++){
+        const cell = document.createElement("div");
+        cell.className = "calCell calDay";
+        cell.textContent = String(day);
+        grid.appendChild(cell);
       }
     }
 
-    function showSchedule() {
-      const displayDiv = document.getElementById("announcementDisplay");
-      displayDiv.innerHTML = `
-        <div class="profile-section" style="display:flex; align-items:center; margin-bottom:12px;">
-          <div class="profile-pic" style="width:50px; height:50px; border-radius:50%; overflow:hidden; margin-right:12px; border: 2px solid #d60b0b;">
-            <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/San_Beda_University_Logo.svg" alt="San Beda Logo" style="width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="profile-name" style="font-weight:bold; font-size:18px; color:#d60b0b;">OPSA</div>
-        </div>
-        <div class="caption" style="font-size:15px; margin-bottom:10px; line-height:1.4;">
-          📅 <strong>February 12, 2026</strong> Schedule for Grade 12 Senior High School 🦁🐯✨
-        </div>
-        <ul style="list-style-type:disc; padding-left:20px; font-size:15px;">
-          <li>🕗 8:00 AM - General Physics 2</li>
-          <li>📖 9:30 AM - Philosophy</li>
-          <li>🧬 11:00 AM - General Biology 2</li>
-          <li>📝 1:00 PM - MIL</li>
-          <li>📚 2:30 PM - ALRWE</li>
-        </ul>
-      `;
-      displayDiv.style.display = "block";
+    /* ===== Forums ===== */
+    function containsBlocked(text){
+      const low = text.toLowerCase();
+      return blockedWords.some(bw => low.includes(bw));
     }
 
-    function showClubAnnouncements() {
-      const displayDiv = document.getElementById("announcementDisplay");
-      displayDiv.innerHTML = `
-        <div class="profile-section" style="display:flex; align-items:center; margin-bottom:12px;">
-          <div class="profile-pic" style="width:50px; height:50px; border-radius:50%; overflow:hidden; margin-right:12px; border: 2px solid #d60b0b;">
-            <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/San_Beda_University_Logo.svg" alt="Club Logo" style="width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="profile-name" style="font-weight:bold; font-size:18px; color:#d60b0b;">Student Council</div>
-        </div>
-        <div class="caption" style="font-size:15px; margin-bottom:10px; line-height:1.4;">
-          📢 <strong>Upcoming Club Events - March 2026</strong>
-        </div>
-        <ul style="list-style-type:disc; padding-left:20px; font-size:15px;">
-          <li>🎉 March 8: International Women's Day Celebration</li>
-          <li>🏅 March 20: Annual Sports Meet Registration Opens</li>
-          <li>📚 March 25: Book Club Monthly Discussion</li>
-        </ul>
-      `;
-      displayDiv.style.display = "block";
-    }
-
-    function showGrade12Announcements() {
-      const displayDiv = document.getElementById("announcementDisplay");
-      displayDiv.innerHTML = `
-        <div class="profile-section" style="display:flex; align-items:center; margin-bottom:12px;">
-          <div class="profile-pic" style="width:50px; height:50px; border-radius:50%; overflow:hidden; margin-right:12px; border: 2px solid #d60b0b;">
-            <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/San_Beda_University_Logo.svg" alt="Grade 12" style="width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="profile-name" style="font-weight:bold; font-size:18px; color:#d60b0b;">Grade 12 Office</div>
-        </div>
-        <div class="caption" style="font-size:15px; margin-bottom:10px; line-height:1.4;">
-          🎓 <strong>Important Dates for Grade 12 Students</strong>
-        </div>
-        <ul style="list-style-type:disc; padding-left:20px; font-size:15px;">
-          <li>🗓 March 15: Graduation Ceremony Information Submission Deadline</li>
-          <li>📑 April 10: Senior High School Final Exams</li>
-          <li>📝 April 25: College Application Workshop</li>
-        </ul>
-      `;
-      displayDiv.style.display = "block";
-    }
-
-    function showSHSAnnouncements() {
-      const displayDiv = document.getElementById("announcementDisplay");
-      displayDiv.innerHTML = `
-        <div class="profile-section" style="display:flex; align-items:center; margin-bottom:12px;">
-          <div class="profile-pic" style="width:50px; height:50px; border-radius:50%; overflow:hidden; margin-right:12px; border: 2px solid #d60b0b;">
-            <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/San_Beda_University_Logo.svg" alt="SHS Logo" style="width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="profile-name" style="font-weight:bold; font-size:18px; color:#d60b0b;">Senior High School Office</div>
-        </div>
-        <div class="caption" style="font-size:15px; margin-bottom:10px; line-height:1.4;">
-          🏫 <strong>SHS Announcements - April 2026</strong>
-        </div>
-        <ul style="list-style-type:disc; padding-left:20px; font-size:15px;">
-          <li>📌 April 5: New SHS Student Orientation</li>
-          <li>🔍 April 15: SHS Scholarship Applications Open</li>
-          <li>🧪 April 20: Science Fair Registration Deadline</li>
-        </ul>
-      `;
-      displayDiv.style.display = "block";
-    }
-
-    function showSBURNews() {
-      const displayDiv = document.getElementById("announcementDisplay");
-      displayDiv.innerHTML = `
-        <div class="profile-section" style="display:flex; align-items:center; margin-bottom:12px;">
-          <div class="profile-pic" style="width:50px; height:50px; border-radius:50%; overflow:hidden; margin-right:12px; border: 2px solid #d60b0b;">
-            <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/San_Beda_University_Logo.svg" alt="SBU-R Logo" style="width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="profile-name" style="font-weight:bold; font-size:18px; color:#d60b0b;">San Beda University - Rizal</div>
-        </div>
-        <div class="caption" style="font-size:15px; margin-bottom:10px; line-height:1.4;">
-          📰 <strong>Latest News & Updates - February 2026</strong>
-        </div>
-        <ul style="list-style-type:disc; padding-left:20px; font-size:15px;">
-          <li>🎓 New academic programs approved starting next school year</li>
-          <li>🏛 Groundbreaking ceremony for new campus building held</li>
-          <li>📢 Campus-wide energy conservation campaign launched</li>
-        </ul>
-      `;
-      displayDiv.style.display = "block";
-    }
-
-    /* Forum scripts */
-    function addForumPost() {
+    function addForumPost(){
       const input = document.getElementById("forumInput");
       const text = input.value.trim();
       if (!text) return;
+
+      if (containsBlocked(text)){
+        alert("Your post contains inappropriate language!");
+        return;
+      }
 
       createPost(currentUserEmail || "You", text);
       input.value = "";
     }
 
-    function createPost(username, text, isSample = false) {
+    function createPost(username, text, isSample = false){
       const postsContainer = document.getElementById("forumPosts");
-
-      const blockedWords = ["badword1", "foulword", "inappropriate"];
-      for (const bw of blockedWords) {
-        if (text.toLowerCase().includes(bw)) {
-          alert("Your post contains inappropriate language!");
-          return;
-        }
-      }
 
       const post = document.createElement("div");
       post.className = "forum-post";
 
-      // Header
       const header = document.createElement("div");
       header.className = "forum-post-header";
 
       const avatar = document.createElement("img");
-      avatar.src = "https://i.pravatar.cc/50?u=" + (isSample ? "physics_guy" : username);
+      avatar.src = "https://i.pravatar.cc/50?u=" + encodeURIComponent(isSample ? "physics_guy" : username);
       avatar.alt = username + " avatar";
 
       const nameSpan = document.createElement("span");
@@ -753,42 +924,33 @@
       header.appendChild(avatar);
       header.appendChild(nameSpan);
 
-      // Content
       const content = document.createElement("p");
       content.className = "forum-post-content";
       content.textContent = text;
 
-      // Comments section
       const commentsSection = document.createElement("div");
       commentsSection.className = "comments-section";
 
       const commentList = document.createElement("div");
       commentList.className = "comment-list";
 
-      commentsSection.appendChild(commentList);
-
-      // Comment input area
       const commentInputDiv = document.createElement("div");
       commentInputDiv.className = "comment-input-div";
 
       const commentInput = document.createElement("input");
       commentInput.type = "text";
       commentInput.placeholder = "Write a comment...";
-      commentInput.className = "comment-input";
 
       const commentBtn = document.createElement("button");
-      commentBtn.className = "comment-btn";
       commentBtn.textContent = "Comment";
       commentBtn.onclick = () => {
         const commentText = commentInput.value.trim();
         if (!commentText) return;
 
-        for (const bw of blockedWords) {
-          if (commentText.toLowerCase().includes(bw)) {
-            alert("Your comment contains inappropriate language!");
-            commentInput.value = "";
-            return;
-          }
+        if (containsBlocked(commentText)){
+          alert("Your comment contains inappropriate language!");
+          commentInput.value = "";
+          return;
         }
 
         const comment = document.createElement("div");
@@ -800,6 +962,7 @@
       commentInputDiv.appendChild(commentInput);
       commentInputDiv.appendChild(commentBtn);
 
+      commentsSection.appendChild(commentList);
       commentsSection.appendChild(commentInputDiv);
 
       post.appendChild(header);
@@ -809,11 +972,10 @@
       postsContainer.prepend(post);
     }
 
-    // Initialize with sample post at load AFTER login — but here for quick testing:
+    // initial state
     document.addEventListener("DOMContentLoaded", () => {
-      // Don't show main app before login
       document.getElementById("mainApp").style.display = "none";
-      document.getElementById("loginScreen").style.display = "flex";
+      document.getElementById("loginScreen").classList.remove("hidden");
     });
   </script>
 </body>
